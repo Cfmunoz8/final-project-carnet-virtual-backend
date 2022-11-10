@@ -17,6 +17,8 @@ class Patient(db.Model):
     phone_number = db.Column(db.Integer, nullable=False)
     alive = db.Column(db.Boolean, default=True)
     caregiver = db.relationship("Caregiver", back_populates="patient", uselist=False)
+    clinical_record = db.relationship("Clinical_record", back_populates="patient", uselist=False)
+
 
 class Caregiver(db.Model):
     __tablename__ = "caregivers"
@@ -38,10 +40,13 @@ class Clinical_record(db.Model):
     zarit_scale_caregiver = db.Column(db.String(100))
     number_of_controls = db.Column(db.Integer)
     last_control_date = db.Column(db.Date, nullable=False)
+    drugs = db.relationship("Drug")
     pathologies = db.relationship("Pahology")
     surgeries = db.relationship("Surgery")
     alergies = db.relationship("Alergy")
     habits = db.relationship("Habit")
+    patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"))
+    patient = db.relationship("Patient", back_populates="clinical_record")
 
 
 class Drug(db.Model):
@@ -49,8 +54,7 @@ class Drug(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     posology = db.Column(db.String(100), nullable=False)
-    
-
+    clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_record.id"), nullable=False)    
 
 
 class Pathology(db.Model):
@@ -73,6 +77,7 @@ class Alergy(db.Model):
     name = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_record.id"), nullable=False)
 
+
 class Habit(db.Model):
     __tablename__ = "habits"
     id = db.Column(db.Integer, primary_key=True)
@@ -80,6 +85,7 @@ class Habit(db.Model):
     alcohol = db.Column(db.Boolean, default=False)
     other_drugs = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_record.id"), nullable=False)
+
 
 class Control(db.Model):
     __tablename__ = "controls"
@@ -89,6 +95,7 @@ class Control(db.Model):
     indications =db.Column(db.String(1000), nullable=False)
     date = db.Column(db.Date, nullable=False)
     professional = db.relationship("Professional")
+
 
 class Professional(db.Model):
     __tablename__ = "professionals"
