@@ -40,11 +40,11 @@ class Clinical_record(db.Model):
     zarit_scale_caregiver = db.Column(db.String(100))
     number_of_controls = db.Column(db.Integer)
     last_control_date = db.Column(db.Date, nullable=False)
-    drugs = db.relationship("Drug", back_populates="clinical_record")
-    pathologies = db.relationship("Pahology", back_populates="clinical_record")
-    surgeries = db.relationship("Surgery", back_populates="clinical_record")
-    alergies = db.relationship("Alergy", back_populates="clinical_record")
-    habits = db.relationship("Habit", back_populates="clinical_record")
+    drugs = db.relationship("Drug")
+    pathologies = db.relationship("Pahology")
+    surgeries = db.relationship("Surgery")
+    alergies = db.relationship("Alergy")
+    habits = db.relationship("Habit", back_populates="clinical_record", uselist=False)
     controls = db.relationship("Control", back_populates="clinical_record")
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"))
     patient = db.relationship("Patient", back_populates="clinical_record")
@@ -56,7 +56,6 @@ class Drug(db.Model):
     name = db.Column(db.String(100), nullable=False)
     posology = db.Column(db.String(100), nullable=False)
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
-
 
 
 class Pathology(db.Model):
@@ -87,6 +86,7 @@ class Habit(db.Model):
     alcohol = db.Column(db.Boolean, default=False)
     other_drugs = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+    clinical_record = db.relationship("Clinical_record", back_populates="habit")
 
 
 class Control(db.Model):
@@ -96,7 +96,8 @@ class Control(db.Model):
     description =db.Column(db.String(1000), nullable=False)
     indications =db.Column(db.String(1000), nullable=False)
     date = db.Column(db.Date, nullable=False)
-    professional = db.relationship("Professional")
+    professional = db.relationship("Professional",back_populates="control")
+    professional_id = db.Column(db.Integer, db.ForeignKey("professionals.id"), nullable=False)
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
 
 
@@ -110,3 +111,4 @@ class Professional(db.Model):
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(50), nullable=False)
     control_id = db.Column(db.Integer, db.ForeignKey("controls.id"))
+    control = db.relationship("Control", back_populates="professional")
