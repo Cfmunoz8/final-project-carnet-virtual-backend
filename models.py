@@ -10,7 +10,7 @@ class Patient(db.Model):
     rut = db.Column(db.String(100), nullable=False, unique=True)
     age = db.Column(db.Integer)
     gender = db.Column(db.String(50))
-    birth_date = db.Column(db.Date, nullable=False)
+    birth_date = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(50), nullable=False)
     address = db.Column(db.String(200), nullable=False)
@@ -19,6 +19,12 @@ class Patient(db.Model):
     caregiver = db.relationship("Caregiver", back_populates="patient", uselist=False)
     clinical_record = db.relationship("Clinical_record", back_populates="patient", uselist=False)
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "lastname": self.lastname,
+        }
 
 class Caregiver(db.Model):
     __tablename__ = "caregivers"
@@ -41,10 +47,10 @@ class Clinical_record(db.Model):
     number_of_controls = db.Column(db.Integer)
     last_control_date = db.Column(db.Date, nullable=False)
     drugs = db.relationship("Drug")
-    pathologies = db.relationship("Pahology")
+    pathologies = db.relationship("Pathology")
     surgeries = db.relationship("Surgery")
     alergies = db.relationship("Alergy")
-    habits = db.relationship("Habit", back_populates="clinical_record", uselist=False)
+    habit = db.relationship("Habit", back_populates="clinical_record", uselist=False)
     controls = db.relationship("Control", back_populates="clinical_record")
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"))
     patient = db.relationship("Patient", back_populates="clinical_record")
@@ -96,10 +102,10 @@ class Control(db.Model):
     description =db.Column(db.String(1000), nullable=False)
     indications =db.Column(db.String(1000), nullable=False)
     date = db.Column(db.Date, nullable=False)
-    professional = db.relationship("Professional",back_populates="control")
+    professional = db.relationship("Professional")
     professional_id = db.Column(db.Integer, db.ForeignKey("professionals.id"), nullable=False)
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
-
+    clinical_record = db.relationship("Clinical_record")
 
 class Professional(db.Model):
     __tablename__ = "professionals"
@@ -110,5 +116,3 @@ class Professional(db.Model):
     role = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(50), nullable=False)
-    control_id = db.Column(db.Integer, db.ForeignKey("controls.id"))
-    control = db.relationship("Control", back_populates="professional")
