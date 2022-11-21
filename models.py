@@ -24,6 +24,7 @@ class Patient(db.Model):
             "id": self.id,
             "name": self.name,
             "lastname": self.lastname,
+            "rut": self.rut
         }
 
 class Caregiver(db.Model):
