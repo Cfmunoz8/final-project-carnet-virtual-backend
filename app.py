@@ -60,6 +60,16 @@ def update_patient(id):
 
     return "paciente actualizado correctamente"
 
+@app.route("/update_patient_alive/<int:id>", methods=["PUT"])
+def update_patient_alive(id):
+    patient = Patient.query.get(id)
+    patient.alive = request.json.get("alive")
+
+    db.session.add(patient)
+    db.session.commit()
+
+    return "se ha cambiado el estado del paciente a fallecido"
+
 @app.route("/delete_patient/<int:id>", methods=["DELETE"])
 def delete_patient(id):
     patient = Patient.query.get(id)
