@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy 
 from models import db, Patient
+from datetime import date
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///final-project.db"
@@ -78,6 +79,29 @@ def delete_patient(id):
     db.session.commit()
 
     return "paciente eliminado correctamente"
+
+
+@app.route("/get_clinical_record", methods=["GET"])
+def get_clinical_record():
+    clinical_record = Clinical_record.query.all()
+    clinical_record_serialized = list(map( lambda clinical_record: clinical_record.serialize(), clinical_record))
+    return jsonify(clinical_record_serialized)
+
+
+@app.route("/create_clinical_record", methods=["POST"])
+def create_clinical_record():
+    clinical_record = Clinical_record()
+    clinical_record.program = request.json.get("program")
+    clinical.record.registration_date = request.json.get("registration_date")
+    clinical_record.barthel_index = request.json.get("barthel_index")
+    clinical_record.zarit_scale_caregiver = request.json.get("zatit_scale_caregiver")
+    clinical_record.patient_id = request.json.get("patient_id")
+
+    db.session.add(clinical_record)
+    db.session.commit()
+
+    return "ficha creada correctamente"
+
 
 
 app.run(host="localhost", port=8080)

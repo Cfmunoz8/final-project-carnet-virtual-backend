@@ -52,8 +52,6 @@ class Clinical_record(db.Model):
     registration_date = db.Column(db.Date)
     barthel_index = db.Column(db.String(100), nullable=False)
     zarit_scale_caregiver = db.Column(db.String(100))
-    number_of_controls = db.Column(db.Integer)
-    last_control_date = db.Column(db.Date, nullable=False)
     drugs = db.relationship("Drug")
     pathologies = db.relationship("Pathology")
     surgeries = db.relationship("Surgery")
@@ -62,6 +60,17 @@ class Clinical_record(db.Model):
     controls = db.relationship("Control", back_populates="clinical_record")
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"))
     patient = db.relationship("Patient", back_populates="clinical_record")
+
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "program": self.program,
+            "registration_date": self.registration_date,
+            "barthel_index": self.barthel_index,
+            "zarit_scale_caregiver": self.zarit_scale_caregiver,
+            "patient_id": self.patient_id,
+        }
 
 
 class Drug(db.Model):
