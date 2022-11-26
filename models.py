@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from datetime import date, datetime
 
 db = SQLAlchemy()
 
@@ -27,7 +28,7 @@ class Patient(db.Model):
             "rut": self.rut,
             "age": self.age,
             "gender": self.gender,
-            "birth_date": self. birth_date,
+            "birth_date": self.birth_date,
             "email": self.email,
             "address": self.address,
             "phone_number": self.phone_number,

@@ -2,14 +2,15 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS 
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy 
-from models import db, Patient
-from datetime import date
+from models import db, Patient, Clinical_record
+from datetime import date, datetime
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///final-project.db"
 db.init_app(app)
 CORS(app)
 Migrate(app, db)
+
 
 @app.route("/")
 def home():
@@ -89,12 +90,14 @@ def get_clinical_record():
 
 
 @app.route("/create_clinical_record", methods=["POST"])
+
 def create_clinical_record():
     clinical_record = Clinical_record()
     clinical_record.program = request.json.get("program")
-    clinical.record.registration_date = request.json.get("registration_date")
+    registration_date = request.json.get("registration_date")
+    clinical_record.registration_date = date.fromisoformat(registration_date)
     clinical_record.barthel_index = request.json.get("barthel_index")
-    clinical_record.zarit_scale_caregiver = request.json.get("zatit_scale_caregiver")
+    clinical_record.zarit_scale_caregiver = request.json.get("zarit_scale_caregiver")
     clinical_record.patient_id = request.json.get("patient_id")
 
     db.session.add(clinical_record)
