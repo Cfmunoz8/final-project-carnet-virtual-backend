@@ -1,15 +1,24 @@
+import os 
 from flask import Flask, jsonify, request
 from flask_cors import CORS 
 from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy 
 from models import db, Patient, Clinical_record
 from datetime import date, datetime
 
+BASEDIR = os.path.abspath(os.path.dirname(__file__))
+
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///final-project.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASEDIR,"final-project.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["ENV"] = "development"
+app.config["SECRET_KEY"] = "super_seret_key"
+
 db.init_app(app)
 CORS(app)
 Migrate(app, db)
+bcrypt = Bcrypt(app)
 
 
 @app.route("/")
@@ -25,14 +34,25 @@ def patient_list():
 @app.route("/add_patient", methods=["POST"])
 def add_patient():
     patient = Patient()
+    email = request.json.get("email")
+    rut = request.json.get("rut")
+    password = request.json.get("password")
+
+    found_patient = Patient.query.filter_by(rut=rut).first()
+
+    if found_patient is not None:
+        return jsonify({
+            "msg": "Ya existe un paciente ingresado con este rut"
+        }), 400
+    
     patient.name = request.json.get("name")
     patient.lastname = request.json.get("lastname")
-    patient.rut = request.json.get("rut")
+    patient.rut = rut
     patient.age = request.json.get("age")
     patient.gender = request.json.get("gender")
     patient.birth_date = request.json.get("birth_date")
-    patient.email = request.json.get("email")
-    patient.password = request.json.get("password")
+    patient.email = email
+    patient.password = password
     patient.address = request.json.get("address")
     patient.phone_number = request.json.get("phone_number")
     patient.alive = request.json.get("alive")
@@ -104,6 +124,7 @@ def create_clinical_record():
     db.session.commit()
 
     return "ficha creada correctamente"
+
 
 
 

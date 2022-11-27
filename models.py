@@ -20,6 +20,9 @@ class Patient(db.Model):
     caregiver = db.relationship("Caregiver", back_populates="patient", uselist=False)
     clinical_record = db.relationship("Clinical_record", back_populates="patient", uselist=False)
 
+    def __repr__(self):
+        return "<Patient %r>" % self.name
+
     def serialize(self):
         return {
             "id": self.id,
