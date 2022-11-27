@@ -1,24 +1,76 @@
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS 
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy 
+from flask_bcrypt import Bcrypt
+#from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from models import db, Patient
+from models import db, Professional
+
+
+BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///final-project.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASEDIR,"final-project.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["ENV"] = "development"
+app.config["SECRET_KEY"] = "super_secret_key"
+
 db.init_app(app)
 CORS(app)
 Migrate(app, db)
+bcrypt = Bcrypt(app)
+#jwt = JWTManager(app)
+
 
 @app.route("/")
 def home():
     return "prueba exitosa"
 
-@app.route("/patient_list", methods=["GET"])
-def patient_list():
-    patient = Patient.query.all()
-    patient_serialized = list(map( lambda patient: patient.serialize(), patient))
-    return jsonify(patient_serialized)
+#@app.route("/patient_list", methods=["GET"])
+#def patient_list():
+    #patient = Patient.query.all()
+    #patient_serialized = list(map( lambda patient: patient.serialize(), patient))
+    #return jsonify(patient_serialized)
+
+#@app.route("/login_professional", methods =["POST"])
+#def login_professional ():
+    
+
+
+@app.route("/add_professional", methods=["POST"])
+def add_professional ():
+    professional = Professional()
+    name = request.json.get("name")
+    lastname = request.json.get("lastname")
+    rut = request.json.get("rut")
+    role = request.json.get("role")
+    email = request.json.get("email")
+    password = request.json.get("password")
+
+    found_professional = Professional.query.filter_by(rut=rut).first()
+    print(found_professional)
+    if found_professional is not None:
+        return jsonify({
+            "msg" :"Rut is already in use"
+        }), 400
+
+    professional.name = name
+    professional.lastname = lastname
+    professional.rut = rut
+    professional.role = role
+    professional.email = email
+    password_hash = bcrypt.generate_password_hash(password)
+    professional.password = password_hash 
+
+    db.session.add(professional)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"success creating professional"
+    }), 200
+
 
 @app.route("/add_patient", methods=["POST"])
 def add_patient():
@@ -79,5 +131,5 @@ def delete_patient(id):
 
     return "paciente eliminado correctamente"
 
-
-app.run(host="localhost", port=8080)
+if __name__ == "__main__":
+    app.run(host="localhost", port=8080)
