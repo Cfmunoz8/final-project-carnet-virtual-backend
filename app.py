@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy 
 from flask_bcrypt import Bcrypt
-#from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from models import db, Patient
 from models import db, Professional
 
@@ -16,27 +16,63 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASEDIR,"fin
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["ENV"] = "development"
 app.config["SECRET_KEY"] = "super_secret_key"
+app.config["JWT_SECRET_KEY"] = "super_jwt_key"
 
 db.init_app(app)
 CORS(app)
 Migrate(app, db)
 bcrypt = Bcrypt(app)
-#jwt = JWTManager(app)
+jwt = JWTManager(app)
 
 
 @app.route("/")
 def home():
     return "prueba exitosa"
 
-#@app.route("/patient_list", methods=["GET"])
-#def patient_list():
-    #patient = Patient.query.all()
-    #patient_serialized = list(map( lambda patient: patient.serialize(), patient))
-    #return jsonify(patient_serialized)
+@app.route("/patient_list", methods=["GET"])
+def patient_list():
+    patient = Patient.query.all()
+    patient_serialized = list(map( lambda patient: patient.serialize(), patient))
+    return jsonify(patient_serialized)
 
-#@app.route("/login_professional", methods =["POST"])
-#def login_professional ():
-    
+
+@app.route("/professionals")   
+@jwt_required()
+def professionals():
+    all_professionals = Professional.query.all()
+    all_professionals = list(map(lambda professional: professional.serialize(),all_professionals ))
+    return jsonify({
+        "data": all_professionals
+    })
+
+
+
+@app.route("/login_professional", methods =["POST"])
+def login_professional ():
+    password = request.json.get("password")
+    rut = request.json.get("rut")
+
+    found_professional =Professional.query.filter_by(rut=rut).first()
+
+    if found_professional is None:
+        return jsonify({
+            "msg":"professional not found plaease create professional"
+        }), 404
+
+
+    if bcrypt.check_password_hash(found_professional.password,password):
+        access_token = create_access_token (identity=rut)
+        return jsonify ({
+            "access_token": access_token,
+            "data": found_professional.serialize(),
+            "success": True
+        }), 200
+
+    else:
+        return jsonify({
+            "msg": "password is invalid"
+        })    
+
 
 
 @app.route("/add_professional", methods=["POST"])
@@ -49,12 +85,19 @@ def add_professional ():
     email = request.json.get("email")
     password = request.json.get("password")
 
-    found_professional = Professional.query.filter_by(rut=rut).first()
-    print(found_professional)
-    if found_professional is not None:
+    found_professional_rut = Professional.query.filter_by(rut=rut).first()
+    
+    if found_professional_rut is not None:
         return jsonify({
             "msg" :"Rut is already in use"
         }), 400
+
+    found_professional_email = Professional.query.filter_by(email=email).first()
+    
+    if found_professional_email is not None:
+        return jsonify({
+            "msg" :"Email is already in use"
+        }), 400   
 
     professional.name = name
     professional.lastname = lastname
