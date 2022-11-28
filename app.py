@@ -6,6 +6,7 @@ from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy 
 from models import db, Patient, Clinical_record
 from datetime import date, datetime
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,17 +14,45 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASEDIR,"final-project.db")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["ENV"] = "development"
-app.config["SECRET_KEY"] = "super_seret_key"
+app.config["SECRET_KEY"] = "super_secret_key"
+app.config["JWT_SECRET_KEY"] = "super_jwt_key"
 
 db.init_app(app)
 CORS(app)
 Migrate(app, db)
 bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 
 
 @app.route("/")
 def home():
     return "prueba exitosa"
+
+@app.route("/login_patient", methods=["POST"])
+def login_patient():
+    password = request.json.get("password")
+    rut = request.json.get("rut")
+
+    found_patient = Patient.query.filter_by(rut=rut).first()
+
+    if found_patient is None:
+        return jsonify ({
+            "msg": "no existen pacientes registrados con este rut"
+        }), 404
+    
+    if bcrypt.check_password_hash(found_patient.password, password):
+        access_token = create_access_token(identity=rut)
+        return jsonify({
+            "acess_token": access_token,
+            "data": found_patient.serialize(),
+            "success": True
+        }), 200
+    
+    else:
+        return jsonify ({
+            "msg": "la contraseña es incorrecta"
+        })
+
 
 @app.route("/patient_list", methods=["GET"])
 def patient_list():
@@ -45,6 +74,13 @@ def add_patient():
             "msg": "Ya existe un paciente ingresado con este rut"
         }), 400
     
+    found_email = Patient.query.filter_by(email=email).first()
+
+    if found_email is not None:
+        return jsonify({
+            "msg": "Ya existe un paciente ingresado con este email"
+        }), 400
+
     patient.name = request.json.get("name")
     patient.lastname = request.json.get("lastname")
     patient.rut = rut
@@ -52,7 +88,8 @@ def add_patient():
     patient.gender = request.json.get("gender")
     patient.birth_date = request.json.get("birth_date")
     patient.email = email
-    patient.password = password
+    password_hash = bcrypt.generate_password_hash(password)
+    patient.password = password_hash
     patient.address = request.json.get("address")
     patient.phone_number = request.json.get("phone_number")
     patient.alive = request.json.get("alive")
@@ -60,7 +97,9 @@ def add_patient():
     db.session.add(patient)
     db.session.commit()
 
-    return "paciente añadido correctamente"
+    return jsonify({
+        "msg": "paciente añadido correctamente"
+        }), 200
 
 @app.route("/update_patient/<int:id>", methods=["PUT"])
 def update_patient(id):
@@ -127,5 +166,5 @@ def create_clinical_record():
 
 
 
-
-app.run(host="localhost", port=8080)
+if __name__ == "__main__":
+    app.run(host="localhost", port=8080)
