@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy 
-from models import db, Patient, Clinical_record
+from models import db, Patient, Clinical_record, Caregiver
 from datetime import date, datetime
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
@@ -140,6 +140,44 @@ def delete_patient(id):
 
     return "paciente eliminado correctamente"
 
+@app.route("/get_caregiver", methods=["GET"])
+def get_caregiver():
+    caregiver = Caregiver.query.all()
+    caregiver_serialized = list(map( lambda caregiver: caregiver.serialize(), caregiver))
+    return jsonify(caregiver_serialized)
+
+@app.route("/add_caregiver", methods=["POST"])
+def add_caregiver():
+    caregiver = Caregiver()
+    patient_id = request.json.get("patient_id")
+
+    found_patient = Patient.query.filter_by(id=patient_id).first()
+
+    if found_patient is None:
+        return jsonify({
+            "msg": "no existe este paciente"
+        }), 400
+
+    found_caegiver = Caregiver.query.filter_by(patient_id=patient_id).first()
+
+    if found_caegiver is not None:
+        return jsonify({
+            "msg": "este paciente ya tiene un cuidador asignado"
+        }), 400
+
+    caregiver.name = request.json.get("name")
+    caregiver.lastname = request.json.get("lastname")
+    caregiver.rut = request.json.get("rut")
+    caregiver.address = request.json.get("address")
+    caregiver.patient_id = patient_id
+
+    db.session.add(caregiver)
+    db.session.commit()
+
+    return jsonify({
+        "msg": "cuidador añadido correctamente"
+    }), 200
+
 
 @app.route("/get_clinical_record", methods=["GET"])
 def get_clinical_record():
@@ -147,22 +185,38 @@ def get_clinical_record():
     clinical_record_serialized = list(map( lambda clinical_record: clinical_record.serialize(), clinical_record))
     return jsonify(clinical_record_serialized)
 
-
 @app.route("/create_clinical_record", methods=["POST"])
-
 def create_clinical_record():
     clinical_record = Clinical_record()
+    patient_id = request.json.get("patient_id")
+
+    found_patient = Patient.query.filter_by(id=patient_id).first()
+
+    if found_patient is None:
+        return jsonify({
+            "msg": "no existe este paciente"
+        }), 400
+
+    found_clinical_record = Clinical_record.query.filter_by(patient_id=patient_id).first()
+
+    if found_clinical_record is not None:
+        return jsonify({
+            "msg": "este paciente ya tiene una ficha clínica creada"
+        }), 400
+
     clinical_record.program = request.json.get("program")
     registration_date = request.json.get("registration_date")
     clinical_record.registration_date = date.fromisoformat(registration_date)
     clinical_record.barthel_index = request.json.get("barthel_index")
     clinical_record.zarit_scale_caregiver = request.json.get("zarit_scale_caregiver")
-    clinical_record.patient_id = request.json.get("patient_id")
+    clinical_record.patient_id = patient_id
 
     db.session.add(clinical_record)
     db.session.commit()
 
-    return "ficha creada correctamente"
+    return jsonify({
+        "msg": "ficha creada correctamente"
+    }), 200
 
 
 

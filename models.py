@@ -48,6 +48,15 @@ class Caregiver(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"))
     patient = db.relationship("Patient", back_populates="caregiver")
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "lastname": self.lastname,
+            "rut": self.rut,
+            "address": self.address,
+            "patient_id": self.patient_id,
+        }
 
 class Clinical_record(db.Model):
     __tablename__ = "clinical_records"
