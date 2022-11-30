@@ -8,7 +8,7 @@ class Patient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
-    rut = db.Column(db.String(100), nullable=False, unique=True)
+    rut = db.Column(db.Integer, nullable=False, unique=True)
     age = db.Column(db.Integer)
     gender = db.Column(db.String(50))
     birth_date = db.Column(db.String(50), nullable=False)
@@ -19,6 +19,9 @@ class Patient(db.Model):
     alive = db.Column(db.Boolean, default=True)
     caregiver = db.relationship("Caregiver", back_populates="patient", uselist=False)
     clinical_record = db.relationship("Clinical_record", back_populates="patient", uselist=False)
+
+    def __repr__(self):
+        return "<Patient %r>" % self.name
 
     def serialize(self):
         return {
@@ -45,6 +48,15 @@ class Caregiver(db.Model):
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"))
     patient = db.relationship("Patient", back_populates="caregiver")
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "lastname": self.lastname,
+            "rut": self.rut,
+            "address": self.address,
+            "patient_id": self.patient_id,
+        }
 
 class Clinical_record(db.Model):
     __tablename__ = "clinical_records"
