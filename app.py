@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy 
-from models import db, Patient, Clinical_record, Caregiver
+from models import db, Patient, Clinical_record, Caregiver, Drug, Control
 from datetime import date, datetime
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
@@ -218,6 +218,67 @@ def create_clinical_record():
         "msg": "ficha creada correctamente"
     }), 200
 
+@app.route("/add_drug", methods=["POST"])
+def create_drug():
+    drug = Drug()
+    clinical_record_id = request.json.get("clinical_record_id")
+
+    found_clinical_record = Clinical_record.query.filter_by(id=clinical_record_id).first()
+
+    if found_clinical_record is None:
+        return jsonify({
+            "msg": "no existe esta ficha clínica"
+        }), 400
+
+    drug.name = request.json.get("name")
+    drug.posology = request.json.get("posology")
+    drug.clinical_record_id = clinical_record_id
+
+    db.session.add(drug)
+    db.session.commit()
+
+    return jsonify({
+        "msg": "medicamento añadido correctamente"
+    }), 200
+
+@app.route("/drugs", methods=["GET"])
+def drugs():
+    drug = Drug.query.all()
+    drug_serialized = list(map( lambda drug: drug.serialize(), drug))
+    return jsonify(drug_serialized)
+
+@app.route("/create_control", methods=["POST"])
+def create_control():
+    control = Control()
+    clinical_record_id = request.json.get("clinical_record_id")
+
+    found_clinical_record = Clinical_record.query.filter_by(id=clinical_record_id).first()
+
+    if found_clinical_record is None:
+        return jsonify({
+            "msg": "no existe esta ficha clínica"
+        }), 400
+
+    control.reason = request.json.get("reason")
+    control.description = request.json.get("description")
+    control.indications = request.json.get("indications")
+    date_of_control = request.json.get("date_of_control")
+    control.date_of_control = date.fromisoformat(date_of_control)
+    control.clinical_record_id = clinical_record_id
+    control.professional_id = request.json.get("professional_id")
+
+    db.session.add(control)
+    db.session.commit()
+
+    return jsonify({
+        "msg": "control añadido correctamente"
+    }), 200
+
+@app.route("/control", methods=["GET"])
+def control():
+    control = Control.query.all()
+    control_serialized = list(map( lambda control: control.serialize(), control))
+    return jsonify(control_serialized)
 
 
 if __name__ == "__main__":
