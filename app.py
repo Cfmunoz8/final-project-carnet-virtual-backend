@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy 
-from models import db, Patient, Clinical_record, Caregiver, Drug, Control
+from models import db, Patient, Clinical_record, Caregiver, Drug, Control,Habit,Pathology,Surgery
 from datetime import date, datetime
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
@@ -280,6 +280,121 @@ def control():
     control_serialized = list(map( lambda control: control.serialize(), control))
     return jsonify(control_serialized)
 
+
+@app.route("/add_habit", methods=["POST"])
+def add_habit():
+    habit = Habit()
+    clinical_record_id = request.json.get("clinical_record_id")
+
+    found_clinical_record = Clinical_record.query.filter_by(id=clinical_record_id).first()
+
+    if found_clinical_record is None:
+        return jsonify({
+            "msg": "no existe esta ficha clínica"
+        }), 400
+
+    habit.smoke = request.json.get("smoke")
+    habit.alcohol = request.json.get("alcohol")
+    habit.other_drugs = request.json.get("other_drugs")
+    habit.clinical_record_id = clinical_record_id
+
+    db.session.add(habit)
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Habito añadido correctamente"
+    }), 200
+
+@app.route("/habit", methods=["GET"])
+def habit():
+    habit = Habit.query.all()
+    habit_serialized = list(map( lambda habit: habit.serialize(), habit))
+    return jsonify(habit_serialized)
+
+
+@app.route("/add_pathology", methods=["POST"])
+def add_pathology():
+    pathology = Pathology()
+    clinical_record_id = request.json.get("clinical_record_id")
+
+    found_clinical_record = Clinical_record.query.filter_by(id=clinical_record_id).first()
+
+    if found_clinical_record is None:
+        return jsonify({
+            "msg": "no existe esta ficha clínica"
+        }), 400
+
+    pathology.name = request.json.get("name")
+    pathology.clinical_record_id = clinical_record_id
+
+    db.session.add(pathology)
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Patologia añadida correctamente"
+    }), 200
+
+@app.route("/pathology", methods=["GET"])
+def pathology():
+    pathology = Pathology.query.all()
+    pathology_serialized = list(map( lambda pathology: pathology.serialize(), pathology))
+    return jsonify(pathology_serialized)
+
+@app.route("/add_surgery", methods=["POST"])
+def add_surgery():
+    surgery = Surgery()
+    clinical_record_id = request.json.get("clinical_record_id")
+
+    found_clinical_record = Clinical_record.query.filter_by(id=clinical_record_id).first()
+
+    if found_clinical_record is None:
+        return jsonify({
+            "msg": "no existe esta ficha clínica"
+        }), 400
+
+    surgery.name = request.json.get("name")
+    surgery.clinical_record_id = clinical_record_id
+
+    db.session.add(surgery)
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Cirugia añadida correctamente"
+    }), 200
+
+@app.route("/surgery", methods=["GET"])
+def surgery():
+    surgery= Surgery.query.all()
+    surgery_serialized = list(map( lambda surgery: surgery.serialize(), surgery))
+    return jsonify(surgery_serialized)
+
+@app.route("/add_alergy", methods=["POST"])
+def add_alergy():
+    alergy = Alergy()
+    clinical_record_id = request.json.get("clinical_record_id")
+
+    found_clinical_record = Clinical_record.query.filter_by(id=clinical_record_id).first()
+
+    if found_clinical_record is None:
+        return jsonify({
+            "msg": "no existe esta ficha clínica"
+        }), 400
+
+    alergy.name = request.json.get("name")
+    alergy.clinical_record_id = clinical_record_id
+
+    db.session.add(alergy)
+    db.session.commit()
+
+    return jsonify({
+        "msg": "Alergia añadida correctamente"
+    }), 200
+
+@app.route("/alergy", methods=["GET"])
+def alergy():
+    alergy =  Alergy.query.all()
+    alergy_serialized = list(map( lambda alergy: alergy.serialize(),  alergy))
+    return jsonify( alergy_serialized)
 
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
