@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 8214ec023270
+Revision ID: 5e8ae71a96dd
 Revises: 
-Create Date: 2022-11-27 21:17:39.470221
+Create Date: 2022-12-02 20:14:22.596805
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '8214ec023270'
+revision = '5e8ae71a96dd'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,7 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('lastname', sa.String(length=100), nullable=False),
-    sa.Column('rut', sa.String(length=100), nullable=False),
+    sa.Column('rut', sa.Integer(), nullable=False),
     sa.Column('age', sa.Integer(), nullable=True),
     sa.Column('gender', sa.String(length=50), nullable=True),
     sa.Column('birth_date', sa.String(length=50), nullable=False),
@@ -39,7 +39,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('lastname', sa.String(length=100), nullable=False),
-    sa.Column('rut', sa.String(length=100), nullable=False),
+    sa.Column('rut', sa.Integer(), nullable=False),
     sa.Column('role', sa.String(length=100), nullable=False),
     sa.Column('email', sa.String(length=150), nullable=False),
     sa.Column('password', sa.String(length=50), nullable=False),
@@ -64,8 +64,6 @@ def upgrade():
     sa.Column('registration_date', sa.Date(), nullable=True),
     sa.Column('barthel_index', sa.String(length=100), nullable=False),
     sa.Column('zarit_scale_caregiver', sa.String(length=100), nullable=True),
-    sa.Column('number_of_controls', sa.Integer(), nullable=True),
-    sa.Column('last_control_date', sa.Date(), nullable=False),
     sa.Column('patient_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['patient_id'], ['patients.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -82,7 +80,7 @@ def upgrade():
     sa.Column('reason', sa.String(length=100), nullable=False),
     sa.Column('description', sa.String(length=1000), nullable=False),
     sa.Column('indications', sa.String(length=1000), nullable=False),
-    sa.Column('date', sa.Date(), nullable=False),
+    sa.Column('date_of_control', sa.Date(), nullable=False),
     sa.Column('professional_id', sa.Integer(), nullable=False),
     sa.Column('clinical_record_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['clinical_record_id'], ['clinical_records.id'], ),
