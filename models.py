@@ -107,6 +107,13 @@ class Pathology(db.Model):
     name = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clinical_record_id": self.clinical_record_id,
+        }
+
 
 class Surgery(db.Model):
     __tablename__ = "surgeries"
@@ -114,12 +121,26 @@ class Surgery(db.Model):
     name = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clinical_record_id": self.clinical_record_id,
+        }
+
 
 class Alergy(db.Model):
     __tablename__ = "alergies"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clinical_record_id": self.clinical_record_id,
+        }
 
 
 class Habit(db.Model):
