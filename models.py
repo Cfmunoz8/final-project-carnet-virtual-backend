@@ -93,12 +93,26 @@ class Drug(db.Model):
     posology = db.Column(db.String(100), nullable=False)
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "posology": self.posology,
+            "clinical_record_id": self.clinical_record_id,
+        }
 
 class Pathology(db.Model):
     __tablename__ = "pathologies"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clinical_record_id": self.clinical_record_id,
+        }
 
 
 class Surgery(db.Model):
@@ -107,12 +121,26 @@ class Surgery(db.Model):
     name = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clinical_record_id": self.clinical_record_id,
+        }
+
 
 class Alergy(db.Model):
     __tablename__ = "alergies"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clinical_record_id": self.clinical_record_id,
+        }
 
 
 class Habit(db.Model):
@@ -131,11 +159,22 @@ class Control(db.Model):
     reason = db.Column(db.String(100), nullable=False)
     description =db.Column(db.String(1000), nullable=False)
     indications =db.Column(db.String(1000), nullable=False)
-    date = db.Column(db.Date, nullable=False)
+    date_of_control = db.Column(db.Date, nullable=False)
     professional = db.relationship("Professional")
     professional_id = db.Column(db.Integer, db.ForeignKey("professionals.id"), nullable=False)
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
     clinical_record = db.relationship("Clinical_record")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "reason": self.reason,
+            "description": self.description,
+            "indications": self.indications,
+            "date_of_control": self.date_of_control,
+            "professional_id": self.professional_id,
+            "clinical_record_id": self.clinical_record_id,
+        }
 
 class Professional(db.Model):
     __tablename__ = "professionals"
