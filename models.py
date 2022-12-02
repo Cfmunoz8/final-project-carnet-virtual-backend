@@ -181,7 +181,24 @@ class Professional(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     lastname = db.Column(db.String(100), nullable=False)
-    rut = db.Column(db.String(100), nullable=False, unique=True)
+    rut = db.Column(db.Integer, nullable=False, unique=True)
     role = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(50), nullable=False)
+
+    def __repr__(self):
+        return "<Professional %r>" % self.name
+
+    def serialize (self):
+        return {
+            "id" : self.id,
+            "name" : self.name,
+            "lastname" : self.lastname,
+            "rut" : self.rut,
+            "role" : self.role,
+            "email" : self.email
+        }
+
+
+
+

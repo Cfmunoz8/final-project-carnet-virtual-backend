@@ -1,10 +1,11 @@
-import os 
+
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS 
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy 
-from models import db, Patient, Clinical_record, Caregiver, Drug, Control,Habit,Pathology,Surgery,Alergy
+from models import db,Professional, Patient, Clinical_record, Caregiver, Drug, Control,Habit,Pathology,Surgery,Alergy
 from datetime import date, datetime
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 
@@ -59,6 +60,86 @@ def patient_list():
     patient = Patient.query.all()
     patient_serialized = list(map( lambda patient: patient.serialize(), patient))
     return jsonify(patient_serialized)
+
+
+@app.route("/professionals")   
+@jwt_required()
+def professionals():
+    all_professionals = Professional.query.all()
+    all_professionals = list(map(lambda professional: professional.serialize(),all_professionals ))
+    return jsonify({
+        "data": all_professionals
+    })
+
+
+
+@app.route("/login_professional", methods =["POST"])
+def login_professional ():
+    password = request.json.get("password")
+    rut = request.json.get("rut")
+
+    found_professional =Professional.query.filter_by(rut=rut).first()
+
+    if found_professional is None:
+        return jsonify({
+            "msg":"professional not found plaease create professional"
+        }), 404
+
+
+    if bcrypt.check_password_hash(found_professional.password,password):
+        access_token = create_access_token (identity=rut)
+        return jsonify ({
+            "access_token": access_token,
+            "data": found_professional.serialize(),
+            "success": True
+        }), 200
+
+    else:
+        return jsonify({
+            "msg": "password is invalid"
+        })    
+
+
+
+@app.route("/add_professional", methods=["POST"])
+def add_professional ():
+    professional = Professional()
+    name = request.json.get("name")
+    lastname = request.json.get("lastname")
+    rut = request.json.get("rut")
+    role = request.json.get("role")
+    email = request.json.get("email")
+    password = request.json.get("password")
+
+    found_professional_rut = Professional.query.filter_by(rut=rut).first()
+    
+    if found_professional_rut is not None:
+        return jsonify({
+            "msg" :"Rut is already in use"
+        }), 400
+
+    found_professional_email = Professional.query.filter_by(email=email).first()
+    
+    if found_professional_email is not None:
+        return jsonify({
+            "msg" :"Email is already in use"
+        }), 400   
+
+    professional.name = name
+    professional.lastname = lastname
+    professional.rut = rut
+    professional.role = role
+    professional.email = email
+    password_hash = bcrypt.generate_password_hash(password)
+    professional.password = password_hash 
+
+    db.session.add(professional)
+    db.session.commit()
+
+    return jsonify({
+        "msg":"success creating professional"
+    }), 200
+
 
 @app.route("/add_patient", methods=["POST"])
 def add_patient():
@@ -139,6 +220,7 @@ def delete_patient(id):
     db.session.commit()
 
     return "paciente eliminado correctamente"
+
 
 @app.route("/get_caregiver", methods=["GET"])
 def get_caregiver():
@@ -398,3 +480,4 @@ def alergy():
 
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
+
