@@ -38,7 +38,7 @@ def login_patient():
 
     if found_patient is None:
         return jsonify ({
-            "msg": "no existen pacientes registrados con este rut"
+            "msg": "contraseña o rut invalido"
         }), 404
     
     if bcrypt.check_password_hash(found_patient.password, password):
@@ -51,7 +51,7 @@ def login_patient():
     
     else:
         return jsonify ({
-            "msg": "la contraseña es incorrecta"
+            "msg": "contraseña o rut invalido"
         })
 
 
@@ -59,6 +59,12 @@ def login_patient():
 def patient_list():
     patient = Patient.query.all()
     patient_serialized = list(map( lambda patient: patient.serialize(), patient))
+    return jsonify(patient_serialized)
+
+@app.route("/patient/<int:id>", methods=["GET"])
+def patient(id):
+    patient = Patient.query.get(id)
+    patient_serialized = patient.serialize()
     return jsonify(patient_serialized)
 
 
