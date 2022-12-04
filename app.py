@@ -335,6 +335,18 @@ def drugs():
     drug_serialized = list(map( lambda drug: drug.serialize(), drug))
     return jsonify(drug_serialized)
 
+@app.route("/delete_drug/<int:id>", methods=["DELETE"])
+def delete_drug(id):
+    drug = Drug.query.get(id)
+    
+    db.session.delete(drug)
+    db.session.commit()
+
+    return jsonify({
+        "msg": "medicamento eliminado correctamente"
+    }), 200
+
+
 @app.route("/create_control", methods=["POST"])
 def create_control():
     control = Control()
