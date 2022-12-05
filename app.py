@@ -42,7 +42,7 @@ def login_patient():
         }), 404
     
     if bcrypt.check_password_hash(found_patient.password, password):
-        access_token = create_access_token(identity=rut)
+        access_token = create_access_token(identity=found_patient.id)
         return jsonify({
             "acess_token": access_token,
             "data": found_patient.serialize(),
@@ -267,10 +267,20 @@ def add_caregiver():
     }), 200
 
 
-@app.route("/get_clinical_record", methods=["GET"])
-def get_clinical_record():
+@app.route("/get_clinical_records", methods=["GET"])
+def get_clinical_records():
     clinical_record = Clinical_record.query.all()
     clinical_record_serialized = list(map( lambda clinical_record: clinical_record.serialize(), clinical_record))
+    return jsonify(clinical_record_serialized)
+
+
+@app.route("/get_clinical_record", methods=["GET"])
+@jwt_required()
+def get_clinical_record():
+    patient_id = get_jwt_identity()
+    print(patient_id)
+    clinical_record = Clinical_record.query.get(patient_id)
+    clinical_record_serialized = clinical_record.serialize()
     return jsonify(clinical_record_serialized)
 
 @app.route("/create_clinical_record", methods=["POST"])
