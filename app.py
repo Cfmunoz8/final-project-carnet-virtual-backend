@@ -56,16 +56,19 @@ def login_patient():
 
 
 @app.route("/patient_list", methods=["GET"])
+@jwt_required()
 def patient_list():
+    professional_id = get_jwt_identity()
+    
     patient = Patient.query.all()
     patient_serialized = list(map( lambda patient: patient.serialize(), patient))
     return jsonify(patient_serialized)
 
 
 @app.route("/professionals")   
-@jwt_required()
+
 def professionals():
-    all_professionals = Professional.query.all()
+    all_professionals = professional.query.all()
     all_professionals = list(map(lambda professional: professional.serialize(),all_professionals ))
     return jsonify({
         "data": all_professionals
@@ -74,20 +77,21 @@ def professionals():
 
 
 @app.route("/login_professional", methods =["POST"])
+
 def login_professional ():
     password = request.json.get("password")
     rut = request.json.get("rut")
 
-    found_professional =Professional.query.filter_by(rut=rut).first()
+    found_professional = Professional.query.filter_by(rut=rut).first()
 
     if found_professional is None:
         return jsonify({
-            "msg":"professional not found plaease create professional"
+            "msg":"rut o contraseña incorrecta"
         }), 404
 
 
-    if bcrypt.check_password_hash(found_professional.password,password):
-        access_token = create_access_token (identity=rut)
+    if bcrypt.check_password_hash(found_professional.password, password):
+        access_token = create_access_token (identity=found_professional.id)
         return jsonify ({
             "access_token": access_token,
             "data": found_professional.serialize(),
@@ -96,7 +100,7 @@ def login_professional ():
 
     else:
         return jsonify({
-            "msg": "password is invalid"
+            "msg": "rut o contraseña incorrecta"
         })    
 
 
@@ -375,9 +379,7 @@ def add_habit():
             "msg": "no existe esta ficha clínica"
         }), 400
 
-    habit.smoke = request.json.get("smoke")
-    habit.alcohol = request.json.get("alcohol")
-    habit.other_drugs = request.json.get("other_drugs")
+    habit.name = request.json.get("name")
     habit.clinical_record_id = clinical_record_id
 
     db.session.add(habit)
@@ -421,6 +423,14 @@ def pathology():
     pathology = Pathology.query.all()
     pathology_serialized = list(map( lambda pathology: pathology.serialize(), pathology))
     return jsonify(pathology_serialized)
+
+
+
+
+
+
+
+
 
 @app.route("/add_surgery", methods=["POST"])
 def add_surgery():

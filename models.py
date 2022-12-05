@@ -3,6 +3,7 @@ from datetime import date, datetime
 
 db = SQLAlchemy()
 
+
 class Patient(db.Model):
     __tablename__ = "patients"
     id = db.Column(db.Integer, primary_key=True)
@@ -17,8 +18,10 @@ class Patient(db.Model):
     address = db.Column(db.String(200), nullable=False)
     phone_number = db.Column(db.Integer, nullable=False)
     alive = db.Column(db.Boolean, default=True)
-    caregiver = db.relationship("Caregiver", back_populates="patient", uselist=False)
-    clinical_record = db.relationship("Clinical_record", back_populates="patient", uselist=False)
+    caregiver = db.relationship(
+        "Caregiver", back_populates="patient", uselist=False)
+    clinical_record = db.relationship(
+        "Clinical_record", back_populates="patient", uselist=False)
 
     def __repr__(self):
         return "<Patient %r>" % self.name
@@ -37,6 +40,7 @@ class Patient(db.Model):
             "phone_number": self.phone_number,
             "alive": self.alive
         }
+
 
 class Caregiver(db.Model):
     __tablename__ = "caregivers"
@@ -58,6 +62,7 @@ class Caregiver(db.Model):
             "patient_id": self.patient_id,
         }
 
+
 class Clinical_record(db.Model):
     __tablename__ = "clinical_records"
     id = db.Column(db.Integer, primary_key=True)
@@ -69,11 +74,11 @@ class Clinical_record(db.Model):
     pathologies = db.relationship("Pathology")
     surgeries = db.relationship("Surgery")
     alergies = db.relationship("Alergy")
-    habit = db.relationship("Habit", back_populates="clinical_record", uselist=False)
+    habit = db.relationship(
+        "Habit", back_populates="clinical_record", uselist=False)
     controls = db.relationship("Control", back_populates="clinical_record")
     patient_id = db.Column(db.Integer, db.ForeignKey("patients.id"))
     patient = db.relationship("Patient", back_populates="clinical_record")
-
 
     def serialize(self):
         return {
@@ -91,7 +96,8 @@ class Drug(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     posology = db.Column(db.String(100), nullable=False)
-    clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+    clinical_record_id = db.Column(db.Integer, db.ForeignKey(
+        "clinical_records.id"), nullable=False)
 
     def serialize(self):
         return {
@@ -101,11 +107,13 @@ class Drug(db.Model):
             "clinical_record_id": self.clinical_record_id,
         }
 
+
 class Pathology(db.Model):
     __tablename__ = "pathologies"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+    clinical_record_id = db.Column(db.Integer, db.ForeignKey(
+        "clinical_records.id"), nullable=False)
 
     def serialize(self):
         return {
@@ -119,7 +127,8 @@ class Surgery(db.Model):
     __tablename__ = "surgeries"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+    clinical_record_id = db.Column(db.Integer, db.ForeignKey(
+        "clinical_records.id"), nullable=False)
 
     def serialize(self):
         return {
@@ -133,7 +142,8 @@ class Alergy(db.Model):
     __tablename__ = "alergies"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+    clinical_record_id = db.Column(db.Integer, db.ForeignKey(
+        "clinical_records.id"), nullable=False)
 
     def serialize(self):
         return {
@@ -146,23 +156,32 @@ class Alergy(db.Model):
 class Habit(db.Model):
     __tablename__ = "habits"
     id = db.Column(db.Integer, primary_key=True)
-    smoke = db.Column(db.Boolean, default=False)
-    alcohol = db.Column(db.Boolean, default=False)
-    other_drugs = db.Column(db.String(100))
-    clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
-    clinical_record = db.relationship("Clinical_record", back_populates="habit")
+    name = db.Column(db.String(100))
+    clinical_record_id = db.Column(db.Integer, db.ForeignKey(
+        "clinical_records.id"), nullable=False)
+    clinical_record = db.relationship(
+        "Clinical_record", back_populates="habit")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clinical_record_id": self.clinical_record_id,
+        }
 
 
 class Control(db.Model):
     __tablename__ = "controls"
-    id = db.Column(db.Integer, primary_key=True)   
+    id = db.Column(db.Integer, primary_key=True)
     reason = db.Column(db.String(100), nullable=False)
-    description =db.Column(db.String(1000), nullable=False)
-    indications =db.Column(db.String(1000), nullable=False)
+    description = db.Column(db.String(1000), nullable=False)
+    indications = db.Column(db.String(1000), nullable=False)
     date_of_control = db.Column(db.Date, nullable=False)
     professional = db.relationship("Professional")
-    professional_id = db.Column(db.Integer, db.ForeignKey("professionals.id"), nullable=False)
-    clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
+    professional_id = db.Column(db.Integer, db.ForeignKey(
+        "professionals.id"), nullable=False)
+    clinical_record_id = db.Column(db.Integer, db.ForeignKey(
+        "clinical_records.id"), nullable=False)
     clinical_record = db.relationship("Clinical_record")
 
     def serialize(self):
@@ -175,6 +194,7 @@ class Control(db.Model):
             "professional_id": self.professional_id,
             "clinical_record_id": self.clinical_record_id,
         }
+
 
 class Professional(db.Model):
     __tablename__ = "professionals"
@@ -189,16 +209,12 @@ class Professional(db.Model):
     def __repr__(self):
         return "<Professional %r>" % self.name
 
-    def serialize (self):
+    def serialize(self):
         return {
-            "id" : self.id,
-            "name" : self.name,
-            "lastname" : self.lastname,
-            "rut" : self.rut,
-            "role" : self.role,
-            "email" : self.email
+            "id": self.id,
+            "name": self.name,
+            "lastname": self.lastname,
+            "rut": self.rut,
+            "role": self.role,
+            "email": self.email
         }
-
-
-
-
