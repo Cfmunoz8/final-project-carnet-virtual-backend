@@ -56,7 +56,10 @@ def login_patient():
 
 
 @app.route("/patient_list", methods=["GET"])
+@jwt_required()
 def patient_list():
+    professional_id = get_jwt_identity()
+    
     patient = Patient.query.all()
     patient_serialized = list(map( lambda patient: patient.serialize(), patient))
     return jsonify(patient_serialized)
@@ -80,20 +83,21 @@ def professionals():
 
 
 @app.route("/login_professional", methods =["POST"])
+
 def login_professional ():
     password = request.json.get("password")
     rut = request.json.get("rut")
 
-    found_professional =Professional.query.filter_by(rut=rut).first()
+    found_professional = Professional.query.filter_by(rut=rut).first()
 
     if found_professional is None:
         return jsonify({
-            "msg":"professional not found plaease create professional"
+            "msg":"rut o contraseña incorrecta"
         }), 404
 
 
-    if bcrypt.check_password_hash(found_professional.password,password):
-        access_token = create_access_token (identity=rut)
+    if bcrypt.check_password_hash(found_professional.password, password):
+        access_token = create_access_token (identity=found_professional.id)
         return jsonify ({
             "access_token": access_token,
             "data": found_professional.serialize(),
@@ -102,9 +106,8 @@ def login_professional ():
 
     else:
         return jsonify({
-            "msg": "password is invalid"
+            "msg": "rut o contraseña incorrecta"
         })    
-
 
 
 @app.route("/add_professional", methods=["POST"])
