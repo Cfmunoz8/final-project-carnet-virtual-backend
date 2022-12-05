@@ -246,9 +246,9 @@ def add_caregiver():
             "msg": "no existe este paciente"
         }), 400
 
-    found_caegiver = Caregiver.query.filter_by(patient_id=patient_id).first()
+    found_caregiver = Caregiver.query.filter_by(patient_id=patient_id).first()
 
-    if found_caegiver is not None:
+    if found_caregiver is not None:
         return jsonify({
             "msg": "este paciente ya tiene un cuidador asignado"
         }), 400
@@ -429,9 +429,7 @@ def add_habit():
             "msg": "no existe esta ficha clínica"
         }), 400
 
-    habit.smoke = request.json.get("smoke")
-    habit.alcohol = request.json.get("alcohol")
-    habit.other_drugs = request.json.get("other_drugs")
+    habit.name = request.json.get("name")
     habit.clinical_record_id = clinical_record_id
 
     db.session.add(habit)
@@ -447,6 +445,13 @@ def habit():
     habit_serialized = list(map( lambda habit: habit.serialize(), habit))
     return jsonify(habit_serialized)
 
+@app.route("/habits", methods=["GET"])
+@jwt_required()
+def habits():
+    patient_id = get_jwt_identity()
+    habit = Habit.query.filter_by(clinical_record_id=patient_id).all()
+    habit_serialized = list(map( lambda habit: habit.serialize(), habit))
+    return jsonify(habit_serialized)
 
 @app.route("/add_pathology", methods=["POST"])
 def add_pathology():
@@ -476,6 +481,15 @@ def pathology():
     pathology_serialized = list(map( lambda pathology: pathology.serialize(), pathology))
     return jsonify(pathology_serialized)
 
+@app.route("/pathologies", methods=["GET"])
+@jwt_required()
+def pathologies():
+    patient_id = get_jwt_identity()
+    pathology = Pathology.query.filter_by(clinical_record_id=patient_id).all()
+    pathology_serialized = list(map( lambda pathology: pathology.serialize(), pathology))
+    return jsonify(pathology_serialized)
+
+
 @app.route("/add_surgery", methods=["POST"])
 def add_surgery():
     surgery = Surgery()
@@ -504,6 +518,15 @@ def surgery():
     surgery_serialized = list(map( lambda surgery: surgery.serialize(), surgery))
     return jsonify(surgery_serialized)
 
+@app.route("/surgeries", methods=["GET"])
+@jwt_required()
+def surgeries():
+    patient_id = get_jwt_identity()
+    surgery = Surgery.query.filter_by(clinical_record_id=patient_id).all()
+    surgery_serialized = list(map( lambda surgery: surgery.serialize(), surgery))
+    return jsonify(surgery_serialized)
+
+
 @app.route("/add_alergy", methods=["POST"])
 def add_alergy():
     alergy = Alergy()
@@ -531,6 +554,15 @@ def alergy():
     alergy =  Alergy.query.all()
     alergy_serialized = list(map( lambda alergy: alergy.serialize(),  alergy))
     return jsonify( alergy_serialized)
+
+@app.route("/alergies", methods=["GET"])
+@jwt_required()
+def alergies():
+    patient_id = get_jwt_identity()
+    alergy = Alergy.query.filter_by(clinical_record_id=patient_id).all()
+    alergy_serialized = list(map( lambda alergy: alergy.serialize(), alergy))
+    return jsonify(alergy_serialized)
+
 
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
