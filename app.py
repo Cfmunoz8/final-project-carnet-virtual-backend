@@ -44,7 +44,7 @@ def login_patient():
     if bcrypt.check_password_hash(found_patient.password, password):
         access_token = create_access_token(identity=found_patient.id)
         return jsonify({
-            "acess_token": access_token,
+            "access_token": access_token,
             "data": found_patient.serialize(),
             "success": True
         }), 200
@@ -286,7 +286,6 @@ def get_clinical_records():
 @jwt_required()
 def get_clinical_record():
     patient_id = get_jwt_identity()
-    print(patient_id)
     clinical_record = Clinical_record.query.get(patient_id)
     clinical_record_serialized = clinical_record.serialize()
     return jsonify(clinical_record_serialized)
