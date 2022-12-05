@@ -228,8 +228,8 @@ def delete_patient(id):
     return "paciente eliminado correctamente"
 
 
-@app.route("/get_caregiver", methods=["GET"])
-def get_caregiver():
+@app.route("/get_caregivers", methods=["GET"])
+def get_caregivers():
     caregiver = Caregiver.query.all()
     caregiver_serialized = list(map( lambda caregiver: caregiver.serialize(), caregiver))
     return jsonify(caregiver_serialized)
@@ -265,6 +265,14 @@ def add_caregiver():
     return jsonify({
         "msg": "cuidador añadido correctamente"
     }), 200
+
+
+@app.route("/get_caregiver", methods=["GET"])
+@jwt_required()
+def get_caregiver():
+    patient_id = get_jwt_identity()
+    caregiver = Caregiver.query.get(patient_id)
+    return jsonify(caregiver.serialize())
 
 
 @app.route("/get_clinical_records", methods=["GET"])
@@ -339,11 +347,21 @@ def create_drug():
         "msg": "medicamento añadido correctamente"
     }), 200
 
-@app.route("/drugs", methods=["GET"])
-def drugs():
+@app.route("/alldrugs", methods=["GET"])
+def alldrugs():
     drug = Drug.query.all()
     drug_serialized = list(map( lambda drug: drug.serialize(), drug))
     return jsonify(drug_serialized)
+
+
+@app.route("/drugs", methods=["GET"])
+@jwt_required()
+def drugs():
+    patient_id = get_jwt_identity()
+    drug = Drug.query.filter_by(clinical_record_id=patient_id).all()
+    drug_serialized = list(map( lambda drug: drug.serialize(), drug))
+    return jsonify(drug_serialized)
+
 
 @app.route("/delete_drug/<int:id>", methods=["DELETE"])
 def delete_drug(id):
@@ -384,11 +402,20 @@ def create_control():
         "msg": "control añadido correctamente"
     }), 200
 
-@app.route("/control", methods=["GET"])
-def control():
+@app.route("/get_all_controls", methods=["GET"])
+def controls():
     control = Control.query.all()
     control_serialized = list(map( lambda control: control.serialize(), control))
     return jsonify(control_serialized)
+
+@app.route("/get_controls", methods=["GET"])
+@jwt_required()
+def get_controls():
+    patient_id = get_jwt_identity()
+    control = Control.query.filter_by(clinical_record_id=patient_id).all()
+    control_serialized = list(map( lambda control: control.serialize(), control))
+    return jsonify(control_serialized)
+
 
 
 @app.route("/add_habit", methods=["POST"])
