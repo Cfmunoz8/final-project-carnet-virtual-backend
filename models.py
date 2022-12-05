@@ -146,12 +146,16 @@ class Alergy(db.Model):
 class Habit(db.Model):
     __tablename__ = "habits"
     id = db.Column(db.Integer, primary_key=True)
-    smoke = db.Column(db.Boolean, default=False)
-    alcohol = db.Column(db.Boolean, default=False)
-    other_drugs = db.Column(db.String(100))
+    name = db.Column(db.String(100))
     clinical_record_id = db.Column(db.Integer, db.ForeignKey("clinical_records.id"), nullable=False)
     clinical_record = db.relationship("Clinical_record", back_populates="habit")
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "clinical_record_id": self.clinical_record_id,
+        }
 
 class Control(db.Model):
     __tablename__ = "controls"
