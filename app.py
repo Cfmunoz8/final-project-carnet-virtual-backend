@@ -65,6 +65,7 @@ def patient_list():
     return jsonify(patient_serialized)
 
 @app.route("/patient/<int:id>", methods=["GET"])
+@jwt_required()
 def patient(id):
     patient = Patient.query.get(id)
     patient_serialized = patient.serialize()
@@ -74,11 +75,9 @@ def patient(id):
 @app.route("/professionals")   
 @jwt_required()
 def professionals():
-    all_professionals = Professional.query.all()
-    all_professionals = list(map(lambda professional: professional.serialize(),all_professionals ))
-    return jsonify({
-        "data": all_professionals
-    })
+    professional = Professional.query.all()
+    professional_serialized = list(map(lambda professional: professional.serialize(), professional))
+    return jsonify(professional_serialized)
 
 
 
@@ -565,6 +564,22 @@ def alergies():
     alergy = Alergy.query.filter_by(clinical_record_id=patient_id).all()
     alergy_serialized = list(map( lambda alergy: alergy.serialize(), alergy))
     return jsonify(alergy_serialized)
+
+
+@app.route("/get_clinical_record/<int:id>", methods=["GET"])
+@jwt_required()
+def clinical_record_by_id(id):
+    clinical_record = Clinical_record.query.get(id)
+    clinical_record_serialized = clinical_record.serialize()
+    return jsonify(clinical_record_serialized)
+
+
+@app.route("/get_caregiver_by_id/<int:patient_id>", methods=["GET"])
+@jwt_required()
+def get_caregiver_by_id(patient_id):
+    patient_id = patient.query.get(id)
+    caregiver = Caregiver.query.filter_by(patient_id).first()
+    return jsonify(caregiver.serialize())
 
 
 if __name__ == "__main__":
