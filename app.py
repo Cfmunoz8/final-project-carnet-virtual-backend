@@ -577,8 +577,8 @@ def clinical_record_by_id(id):
 @app.route("/get_caregiver_by_id/<int:patient_id>", methods=["GET"])
 @jwt_required()
 def get_caregiver_by_id(patient_id):
-    patient_id = patient.query.get(id)
-    caregiver = Caregiver.query.filter_by(patient_id).first()
+    patient = Patient.query.get(patient_id)
+    caregiver = Caregiver.query.filter_by(patient_id=patient_id).first()
     return jsonify(caregiver.serialize())
 
 
