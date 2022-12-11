@@ -147,7 +147,7 @@ def add_professional ():
 
     return jsonify({
         "msg":"success creating professional"
-    }), 200
+    }), 201
 
 
 @app.route("/add_patient", methods=["POST"])
