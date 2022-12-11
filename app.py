@@ -65,6 +65,7 @@ def patient_list():
     return jsonify(patient_serialized)
 
 @app.route("/patient/<int:id>", methods=["GET"])
+@jwt_required()
 def patient(id):
     patient = Patient.query.get(id)
     patient_serialized = patient.serialize()
@@ -74,11 +75,9 @@ def patient(id):
 @app.route("/professionals")   
 @jwt_required()
 def professionals():
-    all_professionals = Professional.query.all()
-    all_professionals = list(map(lambda professional: professional.serialize(),all_professionals ))
-    return jsonify({
-        "data": all_professionals
-    })
+    professional = Professional.query.all()
+    professional_serialized = list(map(lambda professional: professional.serialize(), professional))
+    return jsonify(professional_serialized)
 
 
 
@@ -327,7 +326,7 @@ def create_clinical_record():
     }), 200
 
 @app.route("/add_drug", methods=["POST"])
-def create_drug():
+def add_drug():
     drug = Drug()
     clinical_record_id = request.json.get("clinical_record_id")
 
@@ -565,6 +564,69 @@ def alergies():
     alergy = Alergy.query.filter_by(clinical_record_id=patient_id).all()
     alergy_serialized = list(map( lambda alergy: alergy.serialize(), alergy))
     return jsonify(alergy_serialized)
+
+
+@app.route("/get_clinical_record/<int:id>", methods=["GET"])
+@jwt_required()
+def clinical_record_by_id(id):
+    clinical_record = Clinical_record.query.get(id)
+    clinical_record_serialized = clinical_record.serialize()
+    return jsonify(clinical_record_serialized)
+
+
+@app.route("/get_caregiver_by_id/<int:patient_id>", methods=["GET"])
+@jwt_required()
+def get_caregiver_by_id(patient_id):
+    patient = Patient.query.get(patient_id)
+    caregiver = Caregiver.query.filter_by(patient_id=patient_id).first()
+    return jsonify(caregiver.serialize())
+
+
+@app.route("/get_pathology_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_pathology_by_id(clinical_record_id):
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    pathology = Pathology.query.filter_by(clinical_record_id=clinical_record_id).all()
+    pathology_serialized = list(map( lambda pathology: pathology.serialize(), pathology))
+    return jsonify(pathology_serialized)
+
+
+@app.route("/get_surgery_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_surgery_by_id(clinical_record_id):
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    surgery = Surgery.query.filter_by(clinical_record_id=clinical_record_id).all()
+    surgery_serialized = list(map( lambda surgery: surgery.serialize(), surgery))
+    return jsonify(surgery_serialized)
+
+
+@app.route("/get_alergy_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_alergy_by_id(clinical_record_id):
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    alergy = Alergy.query.filter_by(clinical_record_id=clinical_record_id).all()
+    alergy_serialized = list(map( lambda alergy: alergy.serialize(), alergy))
+    return jsonify(alergy_serialized)
+
+
+@app.route("/get_habit_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_habit_by_id(clinical_record_id):
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    habit = Habit.query.filter_by(clinical_record_id=clinical_record_id).all()
+    habit_serialized = list(map( lambda habit: habit.serialize(), habit))
+    return jsonify(habit_serialized)
+
+
+@app.route("/get_drug_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_drug_by_id(clinical_record_id):
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    drug = Drug.query.filter_by(clinical_record_id=clinical_record_id).all()
+    drug_serialized = list(map( lambda drug: drug.serialize(), drug))
+    return jsonify(drug_serialized)
+
+
 
 
 if __name__ == "__main__":
