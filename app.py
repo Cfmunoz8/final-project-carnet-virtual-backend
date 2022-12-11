@@ -582,6 +582,37 @@ def get_caregiver_by_id(patient_id):
     return jsonify(caregiver.serialize())
 
 
+@app.route("/get_pathology_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_pathology_by_id(clinical_record_id):
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    pathology = Pathology.query.filter_by(clinical_record_id=clinical_record_id).all()
+    pathology_serialized = list(map( lambda pathology: pathology.serialize(), pathology))
+    return jsonify(pathology_serialized)
+
+
+@app.route("/get_surgery_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_surgery_by_id(clinical_record_id):
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    surgery = Surgery.query.filter_by(clinical_record_id=clinical_record_id).all()
+    surgery_serialized = list(map( lambda surgery: surgery.serialize(), surgery))
+    return jsonify(surgery_serialized)
+
+
+@app.route("/get_drugs_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_drugs_by_id(clinical_record_id):
+    patient = Patient.query.get(patient_id)
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    drug = Drug.query.filter_by(clinical_record_id=clinical_record.id).all()
+    drug_serialized = list(map( lambda drug: drug.serialize(), drug))
+    return jsonify(drugs_serialized)
+
+
+
+
+
 if __name__ == "__main__":
     app.run(host="localhost", port=8080)
 
