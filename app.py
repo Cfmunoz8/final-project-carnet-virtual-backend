@@ -326,7 +326,7 @@ def create_clinical_record():
     }), 200
 
 @app.route("/add_drug", methods=["POST"])
-def create_drug():
+def add_drug():
     drug = Drug()
     clinical_record_id = request.json.get("clinical_record_id")
 
@@ -625,8 +625,6 @@ def get_drug_by_id(clinical_record_id):
     drug = Drug.query.filter_by(clinical_record_id=clinical_record_id).all()
     drug_serialized = list(map( lambda drug: drug.serialize(), drug))
     return jsonify(drug_serialized)
-
-
 
 
 
