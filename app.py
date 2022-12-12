@@ -8,6 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from models import db,Professional, Patient, Clinical_record, Caregiver, Drug, Control,Habit,Pathology,Surgery,Alergy
 from datetime import date, datetime
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from werkzeug.utils import secure_filename
 
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
