@@ -146,7 +146,7 @@ def add_professional ():
 
     return jsonify({
         "msg":"success creating professional"
-    }), 200
+    }), 201
 
 
 @app.route("/add_patient", methods=["POST"])
@@ -627,6 +627,13 @@ def get_drug_by_id(clinical_record_id):
     return jsonify(drug_serialized)
 
 
+@app.route("/get_controls_by_id/<int:clinical_record_id>", methods=["GET"])
+@jwt_required()
+def get_controls_by_id(clinical_record_id):
+    clinical_record = Clinical_record.query.get(clinical_record_id)
+    control = Control.query.filter_by(clinical_record_id=clinical_record_id).all()
+    control_serialized = list(map( lambda control: control.serialize(), control))
+    return jsonify(control_serialized)
 
 
 if __name__ == "__main__":
